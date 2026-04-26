@@ -13,13 +13,12 @@ body, html {
   font-family: sans-serif;
 }
 
-/* 封面 */
+/* 封面（已改成图片） */
 #cover {
   position: fixed;
   width: 100%;
   height: 100%;
-  background: #000;
-  color: #fff;
+  background: url('01.jpg') center/cover no-repeat;
   display: flex;
   justify-content: center;
   align-items: center;
@@ -28,12 +27,29 @@ body, html {
   transition: opacity 1s ease;
 }
 
+/* 封面遮罩 */
+#cover::after {
+  content: '';
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  background: rgba(0,0,0,0.3);
+}
+
+/* 按钮 */
 #enterBtn {
-  margin-top: 20px;
   padding: 12px 28px;
   border: 1px solid #fff;
   border-radius: 30px;
+  color: white;
+  z-index: 1;
   cursor: pointer;
+}
+
+/* 标题 */
+#cover h2 {
+  z-index: 1;
+  margin-bottom: 20px;
 }
 
 /* 相册容器 */
@@ -56,33 +72,15 @@ body, html {
   min-width: 100vw;
   height: 100vh;
   scroll-snap-align: center;
-  display: flex;
-  justify-content: center;
-  align-items: center;
   overflow: hidden;
 }
 
-/* 图片层（慢慢放大） */
+/* 图片 */
 .slide img {
   width: 100%;
   height: 100%;
   object-fit: cover;
-  transform: scale(1);
-  transition: transform 6s ease;
-}
-
-/* 当前页放大 */
-.slide.active img {
-  transform: scale(1.1);
-}
-
-/* 视差遮罩层 */
-.overlay {
-  position: absolute;
-  width: 120%;
-  height: 120%;
-  background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.5));
-  pointer-events: none;
+  transition: transform 0.3s linear;
 }
 
 /* 控制按钮 */
@@ -202,12 +200,10 @@ const audio = document.getElementById('bgm');
 const cover = document.getElementById('cover');
 
 let index = 0;
-let timer = null;
-
-// 🎵 初始音量为0（渐入关键）
-audio.volume = 0;
 
 // 🎵 音乐渐入
+audio.volume = 0;
+
 function fadeInAudio() {
   let vol = 0;
   const fade = setInterval(() => {
@@ -220,26 +216,19 @@ function fadeInAudio() {
   }, 200);
 }
 
-// 更新激活页
-function updateActive() {
-  slides.forEach((slide, i) => {
-    slide.classList.toggle('active', i === index);
-  });
-}
-
-// 自动轮播（节奏更像Apple）
+// 自动轮播
 function startAuto() {
-  timer = setInterval(() => {
+  setInterval(() => {
     index = (index + 1) % slides.length;
+
     container.scrollTo({
       left: index * window.innerWidth,
       behavior: 'smooth'
     });
-    updateActive();
   }, 3000);
 }
 
-// ✨ 视差效果
+// 视差（只移动，不放大）
 container.addEventListener('scroll', () => {
   const scrollLeft = container.scrollLeft;
 
@@ -247,12 +236,8 @@ container.addEventListener('scroll', () => {
     const offset = i * window.innerWidth - scrollLeft;
     const img = slide.querySelector('img');
 
-    // 轻微视差移动
-    img.style.transform = `scale(${i === index ? 1.1 : 1}) translateX(${offset * 0.05}px)`;
+    img.style.transform = `translateX(${offset * 0.05}px)`;
   });
-
-  index = Math.round(scrollLeft / window.innerWidth);
-  updateActive();
 });
 
 // 点击进入
@@ -261,12 +246,10 @@ document.getElementById('enterBtn').onclick = () => {
   setTimeout(() => cover.style.display = 'none', 1000);
 
   audio.play();
-  fadeInAudio(); // 🎵 渐入
+  fadeInAudio();
   startAuto();
 };
 </script>
 
-</body>
-</html>
 </body>
 </html>
