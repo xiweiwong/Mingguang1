@@ -210,14 +210,19 @@ function fadeInAudio() {
 
 // 自动轮播
 function startAuto() {
-  setInterval(() => {
+  function next() {
     index = (index + 1) % slides.length;
 
     container.scrollTo({
       left: index * window.innerWidth,
       behavior: 'smooth'
     });
-  }, 8000);
+
+    // 每张停留时间
+    setTimeout(next, 7000);
+  }
+
+  next();
 }
 
 // 点击进入
