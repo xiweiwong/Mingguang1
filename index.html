@@ -13,6 +13,30 @@ body, html {
   font-family: sans-serif;
 }
 
+/* 封面页 */
+#cover {
+  position: fixed;
+  width: 100%;
+  height: 100%;
+  background: #000;
+  color: #fff;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  flex-direction: column;
+  z-index: 9999;
+  transition: opacity 0.8s ease;
+}
+
+#enterBtn {
+  margin-top: 20px;
+  padding: 12px 24px;
+  border: 1px solid #fff;
+  border-radius: 30px;
+  cursor: pointer;
+}
+
+/* 相册 */
 .container {
   display: flex;
   width: 100vw;
@@ -22,7 +46,6 @@ body, html {
   scroll-behavior: smooth;
 }
 
-/* 隐藏滚动条（更像苹果） */
 .container::-webkit-scrollbar {
   display: none;
 }
@@ -36,7 +59,7 @@ body, html {
   align-items: center;
   opacity: 0.3;
   transform: scale(0.95);
-  transition: all 0.8s ease; /* 丝滑关键 */
+  transition: all 0.6s ease;
 }
 
 .slide.active {
@@ -48,25 +71,28 @@ img {
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  transition: transform 1s ease;
 }
 
-/* 控制按钮 */
 #control {
   position: fixed;
   top: 20px;
   right: 20px;
-  font-size: 26px;
+  font-size: 24px;
   color: white;
   z-index: 999;
-  cursor: pointer;
 }
 </style>
 </head>
 
 <body>
 
-<div id="control">▶️</div>
+<!-- 封面 -->
+<div id="cover">
+  <h2>作品展览</h2>
+  <div id="enterBtn">点击进入</div>
+</div>
+
+<div id="control">🔊</div>
 
 <audio id="bgm" loop>
   <source src="ghl.mp3" type="audio/mpeg">
@@ -160,23 +186,22 @@ img {
 const container = document.getElementById('container');
 const slides = document.querySelectorAll('.slide');
 const audio = document.getElementById('bgm');
-const btn = document.getElementById('control');
+const cover = document.getElementById('cover');
 
 let index = 0;
-let playing = false;
 let timer = null;
 
-// 🎵 设置音量（重点）
-audio.volume = 0.1; // 0.0 ~ 1.0（0.2 = 很轻柔）
+// 音量（柔和）
+audio.volume = 0.1;
 
-// 切换激活状态（动画关键）
+// 更新动画状态
 function updateActive() {
   slides.forEach((slide, i) => {
     slide.classList.toggle('active', i === index);
   });
 }
 
-// 自动轮播
+// 自动轮播（加快）
 function startAuto() {
   timer = setInterval(() => {
     index = (index + 1) % slides.length;
@@ -185,40 +210,19 @@ function startAuto() {
       behavior: 'smooth'
     });
     updateActive();
-  }, 6000); // 慢一点更高级
+  }, 3000); // ⭐ 调快：3秒
 }
 
-// 停止轮播
-function stopAuto() {
-  clearInterval(timer);
-}
+// 点击进入
+document.getElementById('enterBtn').onclick = () => {
+  cover.style.opacity = 0;
+  setTimeout(() => cover.style.display = 'none', 800);
 
-// 控制按钮
-btn.onclick = () => {
-  playing = !playing;
-
-  if (playing) {
-    btn.innerHTML = '⏸️';
-    audio.play();
-    startAuto();
-  } else {
-    btn.innerHTML = '▶️';
-    audio.pause();
-    stopAuto();
-  }
+  audio.play();
+  startAuto();
 };
 
-// 微信限制：首次点击触发
-document.body.addEventListener('click', () => {
-  if (!playing) {
-    playing = true;
-    btn.innerHTML = '⏸️';
-    audio.play();
-    startAuto();
-  }
-}, { once: true });
-
-// 手动滑动同步动画
+// 手动滑动同步
 container.addEventListener('scroll', () => {
   index = Math.round(container.scrollLeft / window.innerWidth);
   updateActive();
@@ -226,5 +230,4 @@ container.addEventListener('scroll', () => {
 </script>
 
 </body>
-</html>
 </html>
