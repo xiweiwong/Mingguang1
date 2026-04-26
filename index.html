@@ -1,14 +1,133 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title></title>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+
+<style>
+body, html {
+  margin: 0;
+  padding: 0;
+  background: #000;
+  overflow: hidden;
+}
+
+.container {
+  display: flex;
+  width: 100vw;
+  height: 100vh;
+  overflow-x: scroll;
+  scroll-snap-type: x mandatory;
+  scroll-behavior: smooth;
+}
+
+.slide {
+  min-width: 100vw;
+  height: 100vh;
+  scroll-snap-align: center;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+img {
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+}
+
+#control {
+  position: fixed;
+  top: 20px;
+  right: 20px;
+  font-size: 26px;
+  color: white;
+  z-index: 999;
+  cursor: pointer;
+}
+</style>
 </head>
 
-<body style="margin:0;background:#000;">
-  <img src="https://pic1.imgdb.cn/item/69ede482f12344047bf4fcd3.jpg" 
-       style="width:100%;display:block;" 
-       referrerpolicy="no-referrer">
+<body>
+
+<div id="control">▶️</div>
+
+<audio id="bgm" loop>
+  <source src="你的背景音乐.mp3" type="audio/mpeg">
+</audio>
+
+<div class="container" id="container">
+
+  <div class="slide">
+    <img src="图片1.jpg">
+  </div>
+
+  <div class="slide">
+    <img src="图片2.jpg">
+  </div>
+
+  <div class="slide">
+    <img src="图片3.jpg">
+  </div>
+
+</div>
+
+<script>
+const container = document.getElementById('container');
+const slides = document.querySelectorAll('.slide');
+const audio = document.getElementById('bgm');
+const btn = document.getElementById('control');
+
+let index = 0;
+let playing = false;
+let timer = null;
+
+// 自动轮播
+function startAuto() {
+  timer = setInterval(() => {
+    index = (index + 1) % slides.length;
+    container.scrollTo({
+      left: index * window.innerWidth,
+      behavior: 'smooth'
+    });
+  }, 5000); // 每5秒切换
+}
+
+// 停止轮播
+function stopAuto() {
+  clearInterval(timer);
+}
+
+// 播放控制
+btn.onclick = () => {
+  playing = !playing;
+
+  if (playing) {
+    btn.innerHTML = '⏸️';
+    audio.play();
+    startAuto();
+  } else {
+    btn.innerHTML = '▶️';
+    audio.pause();
+    stopAuto();
+  }
+};
+
+// 微信限制：首次点击触发
+document.body.addEventListener('click', () => {
+  if (!playing) {
+    playing = true;
+    btn.innerHTML = '⏸️';
+    audio.play();
+    startAuto();
+  }
+}, { once: true });
+
+// 手动滑动时同步 index
+container.addEventListener('scroll', () => {
+  index = Math.round(container.scrollLeft / window.innerWidth);
+});
+</script>
+
 </body>
 </html>
