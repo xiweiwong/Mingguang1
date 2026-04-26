@@ -13,7 +13,7 @@ body, html {
   font-family: sans-serif;
 }
 
-/* 封面页 */
+/* 封面 */
 #cover {
   position: fixed;
   width: 100%;
@@ -25,18 +25,18 @@ body, html {
   align-items: center;
   flex-direction: column;
   z-index: 9999;
-  transition: opacity 0.8s ease;
+  transition: opacity 1s ease;
 }
 
 #enterBtn {
   margin-top: 20px;
-  padding: 12px 24px;
+  padding: 12px 28px;
   border: 1px solid #fff;
   border-radius: 30px;
   cursor: pointer;
 }
 
-/* 相册 */
+/* 相册容器 */
 .container {
   display: flex;
   width: 100vw;
@@ -50,29 +50,42 @@ body, html {
   display: none;
 }
 
+/* 每一页 */
 .slide {
+  position: relative;
   min-width: 100vw;
   height: 100vh;
   scroll-snap-align: center;
   display: flex;
   justify-content: center;
   align-items: center;
-  opacity: 0.3;
-  transform: scale(0.95);
-  transition: all 0.6s ease;
+  overflow: hidden;
 }
 
-.slide.active {
-  opacity: 1;
+/* 图片层（慢慢放大） */
+.slide img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
   transform: scale(1);
+  transition: transform 6s ease;
 }
 
-img {
-  max-width: 100%;
-  max-height: 100%;
-  object-fit: contain;
+/* 当前页放大 */
+.slide.active img {
+  transform: scale(1.1);
 }
 
+/* 视差遮罩层 */
+.overlay {
+  position: absolute;
+  width: 120%;
+  height: 120%;
+  background: radial-gradient(circle, transparent 60%, rgba(0,0,0,0.5));
+  pointer-events: none;
+}
+
+/* 控制按钮 */
 #control {
   position: fixed;
   top: 20px;
@@ -88,7 +101,7 @@ img {
 
 <!-- 封面 -->
 <div id="cover">
-  <h2>作品展览</h2>
+  <h2>艺术展览</h2>
   <div id="enterBtn">点击进入</div>
 </div>
 
@@ -191,17 +204,30 @@ const cover = document.getElementById('cover');
 let index = 0;
 let timer = null;
 
-// 音量（柔和）
-audio.volume = 0.1;
+// 🎵 初始音量为0（渐入关键）
+audio.volume = 0;
 
-// 更新动画状态
+// 🎵 音乐渐入
+function fadeInAudio() {
+  let vol = 0;
+  const fade = setInterval(() => {
+    if (vol < 0.2) {
+      vol += 0.02;
+      audio.volume = vol;
+    } else {
+      clearInterval(fade);
+    }
+  }, 200);
+}
+
+// 更新激活页
 function updateActive() {
   slides.forEach((slide, i) => {
     slide.classList.toggle('active', i === index);
   });
 }
 
-// 自动轮播（加快）
+// 自动轮播（节奏更像Apple）
 function startAuto() {
   timer = setInterval(() => {
     index = (index + 1) % slides.length;
@@ -210,24 +236,37 @@ function startAuto() {
       behavior: 'smooth'
     });
     updateActive();
-  }, 3000); // ⭐ 调快：3秒
+  }, 3000);
 }
+
+// ✨ 视差效果
+container.addEventListener('scroll', () => {
+  const scrollLeft = container.scrollLeft;
+
+  slides.forEach((slide, i) => {
+    const offset = i * window.innerWidth - scrollLeft;
+    const img = slide.querySelector('img');
+
+    // 轻微视差移动
+    img.style.transform = `scale(${i === index ? 1.1 : 1}) translateX(${offset * 0.05}px)`;
+  });
+
+  index = Math.round(scrollLeft / window.innerWidth);
+  updateActive();
+});
 
 // 点击进入
 document.getElementById('enterBtn').onclick = () => {
   cover.style.opacity = 0;
-  setTimeout(() => cover.style.display = 'none', 800);
+  setTimeout(() => cover.style.display = 'none', 1000);
 
   audio.play();
+  fadeInAudio(); // 🎵 渐入
   startAuto();
 };
-
-// 手动滑动同步
-container.addEventListener('scroll', () => {
-  index = Math.round(container.scrollLeft / window.innerWidth);
-  updateActive();
-});
 </script>
 
+</body>
+</html>
 </body>
 </html>
